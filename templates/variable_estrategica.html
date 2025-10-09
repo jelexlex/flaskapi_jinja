@@ -5,13 +5,12 @@
 
     <!-- ===============================
          Formulario de creación/actualización
-         - Usa el modo "crear" o "actualizar" según lo que se envíe desde Flask
-         - Si "variable" tiene datos, los carga en el formulario
+         Usa el modo "crear" o "actualizar" según lo que se envíe desde Flask
     ================================== -->
     <form method="post" 
           action="{{ url_for('rutas_variables.crear_variable') if modo == 'crear' else url_for('rutas_variables.actualizar_variable') }}">
         
-        <!-- Campo Código (ID en la base de datos) -->
+        <!-- Campo Código -->
         <input type="number" name="codigo" placeholder="ID"
                value="{{ variable.id if variable else '' }}" required>
 
@@ -23,7 +22,7 @@
         <input type="text" name="descripcion" placeholder="Descripción"
                value="{{ variable.descripcion if variable else '' }}" required>
 
-        <!-- Botón dinámico (Crear / Actualizar) -->
+        <!-- Botón dinámico -->
         <button type="submit">
             {{ "Crear" if modo == "crear" else "Actualizar" }}
         </button>
@@ -31,8 +30,6 @@
 
     <!-- ===============================
          Formulario de búsqueda
-         - Permite buscar una variable por su ID
-         - Si la encuentra, carga sus datos en el formulario principal
     ================================== -->
     <form method="post" action="{{ url_for('rutas_variables.buscar_variable') }}">
         <input type="number" name="codigo_buscar" placeholder="Buscar por ID" required>
@@ -46,8 +43,6 @@
 
     <!-- ===============================
          Tabla con todas las variables estratégicas
-         - Las variables vienen desde la API en la clave "datos"
-         - Cada fila muestra una variable con su botón de eliminar
     ================================== -->
     <table border="1" cellpadding="5" cellspacing="0" style="margin: 20px auto; border-collapse: collapse;">
         <thead>

@@ -1,36 +1,43 @@
-# Importar módulos necesarios de Flask y la librería requests para conectarse a la API externa
 from flask import Blueprint, render_template, request, redirect, url_for
 import requests
 
-# Crear el Blueprint de variables estratégicas
-# "rutas_variables" es el nombre del módulo
-# __name__ permite ubicar las plantillas dentro del proyecto
 rutas_variables = Blueprint("rutas_variables", __name__)
-
-# URL base de la API en C# que gestiona las variables estratégicas
-API_URL = "http://localhost:5031/api/variable_estrategica"
+API_URL = "http://localhost:5000/api/variables"  # Cambia esto si tu API tiene otra URL
 
 # ------------------- LISTAR variables estratégicas -------------------
-@rutas_variables.route("/variables")
+@rutas_variables.route("/variables", methods=["GET"])
 def variables():
-    """
-    Ruta para listar todas las variables estratégicas disponibles en la API.
-    Llama al endpoint /api/variable_estrategica y extrae la lista de variables desde la clave "datos".
-    """
     try:
         respuesta = requests.get(API_URL)
         variables = respuesta.json().get("datos", [])
     except Exception as e:
         variables = []
-        print("Error al conectar con la API:", e)
+        print(f"Error al obtener variables: {e}")
 
-    # Retorna la plantilla variable_estrategica.html con la lista de variables
     return render_template(
         "variable_estrategica.html",
         variables=variables,
         variable=None,
-        modo="crear"
+        modo="crear"  # Por defecto el formulario está en modo creación
     )
+
+# ------------------- CREAR variable estratégica -------------------
+@rutas_variables.route("/variables/crear", methods=["POST"])
+def crear_variable():
+    datos = {
+        "id": request.form.get("codigo"),
+        "titulo": request.form.get("titulo"),
+        "descripcion": request.form.get("descripcion")
+    }
+
+    try:
+        respuesta = requests.post(API_URL, json=datos)
+        if respuesta.status_code == 201:
+            return redirect(url_for("rutas_variables.variables"))
+        else:
+            return f"Error al crear variable: {respuesta.text}"
+    except Exception as e:
+        return f"Error al crear variable estratégica: {e}"
 
 # ------------------- BUSCAR variable estratégica -------------------
 @rutas_variables.route("/variables/buscar", methods=["POST"])
@@ -68,10 +75,8 @@ def buscar_variable():
 def actualizar_variable():
     codigo = request.form.get("codigo")
     datos = {
-        "nombre": request.form.get("nombre"),
-        "descripcion": request.form.get("descripcion"),
-        "tipo": request.form.get("tipo"),
-        "valor_objetivo": float(request.form.get("valor_objetivo", 0))
+        "titulo": request.form.get("titulo"),
+        "descripcion": request.form.get("descripcion")
     }
 
     try:
