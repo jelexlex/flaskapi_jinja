@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block contenido %}
+    <h1>Gestión de Tipos de Responsable</h1>
+
+    <!-- FORMULARIO CREAR / ACTUALIZAR -->
+    <form method="post"
+          action="{{ url_for('rutas_tipo_responsable.crear_tipo_responsable') if modo == 'crear' else url_for('rutas_tipo_responsable.actualizar_tipo_responsable') }}">
+        
+        <!-- ID -->
+        <input type="number" name="id" placeholder="ID"
+               value="{{ tipo.id if tipo and tipo.get('id') else '' }}" 
+               {{ 'readonly' if modo != 'crear' }} required>
+
+        <input type="text" name="titulo" placeholder="Título"
+               value="{{ tipo.titulo if tipo and tipo.get('titulo') else '' }}" required>
+
+        <input type="text" name="descripcion" placeholder="Descripción"
+               value="{{ tipo.descripcion if tipo and tipo.get('descripcion') else '' }}" required>
+
+        <button type="submit">
+            {{ "Crear" if modo == "crear" else "Actualizar" }}
+        </button>
+    </form>
+
+    <!-- FORMULARIO BUSCAR -->
+    <form method="post" action="{{ url_for('rutas_tipo_responsable.buscar_tipo_responsable') }}">
+        <input type="number" name="id_buscar" placeholder="Buscar por ID" required>
+        <button type="submit">Buscar</button>
+    </form>
+
+    {% if mensaje %}
+        <p style="color: red; text-align:center;">{{ mensaje }}</p>
+    {% endif %}
+
+    <!-- TABLA CENTRADA Y ENCASILLADA -->
+    <div class="card shadow-sm mt-4" style="max-width: 80%; margin: 0 auto;">
+        <div class="card-header bg-dark text-white text-center">
+            Lista de Tipos de Responsable
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered align-middle mb-0 text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Título</th>
+                        <th>Descripción</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tipos %}
+                        <tr>
+                            <td>{{ t.id }}</td>
+                            <td>{{ t.titulo }}</td>
+                            <td>{{ t.descripcion }}</td>
+                            <td style="text-align:center;">
+                                <!-- Eliminar -->
+                                <form method="post"
+                                      action="{{ url_for('rutas_tipo_responsable.eliminar_tipo_responsable', id=t.id) }}"
+                                      style="display:inline;">
+                                    <button type="submit" onclick="return confirm('¿Eliminar este tipo de responsable?')">Eliminar</button>
+                                </form>
+
+                                <!-- Editar -->
+                                <form method="post" action="{{ url_for('rutas_tipo_responsable.buscar_tipo_responsable') }}" style="display:inline;">
+                                    <input type="hidden" name="id_buscar" value="{{ t.id }}">
+                                    <button type="submit">Editar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">No hay tipos de responsable registrados.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

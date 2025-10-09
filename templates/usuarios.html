@@ -19,12 +19,10 @@
                 <form method="post" 
                       action="{{ url_for('rutas_usuarios.crear_usuario') if modo == 'crear' else url_for('rutas_usuarios.actualizar_usuario', id_usuario=usuario.id if usuario else 0) }}">
                     
-                    <!-- Campo oculto ID (solo actualización) -->
                     {% if modo == 'actualizar' %}
                         <input type="hidden" name="id_usuario" value="{{ usuario.id }}">
                     {% endif %}
 
-                    <!-- Campo Email -->
                     <div class="mb-3">
                         <label for="email" class="form-label">Correo electrónico</label>
                         <input type="email" id="email" name="email" class="form-control"
@@ -32,15 +30,12 @@
                                value="{{ usuario.email if usuario else '' }}" required {{ 'readonly' if modo == 'actualizar' }}>
                     </div>
 
-                    <!-- Campo Contraseña -->
                     <div class="mb-3">
                         <label for="contrasena" class="form-label">Contraseña</label>
                         <input type="password" id="contrasena" name="contrasena" class="form-control"
-                               placeholder="Contraseña del usuario"
-                               value="" required>
+                               placeholder="Contraseña del usuario" value="" required>
                     </div>
 
-                    <!-- Campo Ruta Avatar -->
                     <div class="mb-3">
                         <label for="ruta_avatar" class="form-label">Ruta avatar (opcional)</label>
                         <input type="text" id="ruta_avatar" name="ruta_avatar" class="form-control"
@@ -48,7 +43,6 @@
                                value="{{ usuario.ruta_avatar if usuario else '' }}">
                     </div>
 
-                    <!-- Campo Activo -->
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" id="activo" name="activo"
                                {% if usuario and usuario.activo %}checked{% endif %}>
@@ -57,7 +51,6 @@
                         </label>
                     </div>
 
-                    <!-- Botón dinámico -->
                     <div class="d-grid">
                         <button type="submit" class="btn btn-{{ 'success' if modo == 'crear' else 'warning' }}">
                             {{ "Crear usuario" if modo == "crear" else "Actualizar usuario" }}
@@ -86,9 +79,6 @@
     </div>
 </div>
 
-<!-- ==========================================================
-     MENSAJE DE ERROR O NOTIFICACIÓN
-     ========================================================== -->
 {% if mensaje %}
     <div class="alert alert-danger text-center" role="alert">
         {{ mensaje }}
@@ -96,14 +86,15 @@
 {% endif %}
 
 <!-- ==========================================================
-     TABLA DE USUARIOS REGISTRADOS
+     TABLA DE USUARIOS REGISTRADOS (centrada)
      ========================================================== -->
-<div class="card shadow-sm mt-4">
-    <div class="card-header bg-dark text-white">
+     
+<div class="card shadow-sm mt-4" style="max-width: 30%; margin: 0 auto;">
+    <div class="card-header bg-dark text-white text-center">
         Lista de usuarios registrados
     </div>
     <div class="table-responsive">
-        <table class="table table-striped table-hover align-middle mb-0">
+        <table border="1" cellpadding="5" cellspacing="0" style="margin: 20px auto; border-collapse: collapse;">
             <thead class="table-dark">
                 <tr>
                     <th scope="col">ID</th>
@@ -121,14 +112,12 @@
                         <td>{{ u.ruta_avatar or '-' }}</td>
                         <td>{{ 'Sí' if u.activo else 'No' }}</td>
                         <td class="text-center d-flex justify-content-center gap-2">
-                            <!-- Botón de eliminar -->
                             <form method="post" 
                                   action="{{ url_for('rutas_usuarios.eliminar_usuario', id_usuario=u.id) }}"
                                   onsubmit="return confirm('¿Está seguro de eliminar al usuario {{ u.email }}?');">
                                 <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
                             </form>
 
-                            <!-- Botón de editar -->
                             <form method="post" 
                                   action="{{ url_for('rutas_usuarios.buscar_usuario') }}">
                                 <input type="hidden" name="email_buscar" value="{{ u.email }}">
