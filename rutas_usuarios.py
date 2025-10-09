@@ -19,7 +19,7 @@ def listar_usuarios():
         respuesta = requests.get(API_URL)
         usuarios = respuesta.json().get("datos", [])
     except Exception as e:
-        print("Error al conectar con la API:", e)
+        print("❌ Error al conectar con la API:", e)
         usuarios = []
 
     return render_template("usuarios.html", usuarios=usuarios, usuario=None, modo="crear")
@@ -41,7 +41,7 @@ def buscar_usuario():
                 usuarios = requests.get(API_URL).json().get("datos", [])
                 return render_template("usuarios.html", usuarios=usuarios, usuario=usuario, modo="actualizar")
     except Exception as e:
-        print("Error al buscar usuario:", e)
+        print("❌ Error al buscar usuario:", e)
 
     usuarios = requests.get(API_URL).json().get("datos", [])
     return render_template("usuarios.html", usuarios=usuarios, usuario=None, mensaje="Usuario no encontrado", modo="crear")
@@ -54,42 +54,56 @@ def buscar_usuario():
 def crear_usuario():
     datos = {
         "email": request.form.get("email"),
-        "contrasena": request.form.get("contrasena")
+        "contrasena": request.form.get("contrasena"),
+        "ruta_avatar": request.form.get("ruta_avatar"),
+        "activo": True  # por defecto activo
     }
 
     try:
-        requests.post(f"{API_URL}?camposEncriptar=contrasena", json=datos)
+        r = requests.post(f"{API_URL}?camposEncriptar=contrasena", json=datos)
+        if r.status_code not in (200, 201):
+            return f"❌ Error al crear usuario: {r.status_code} - {r.text}"
     except Exception as e:
-        return f"Error al crear usuario: {e}"
+        return f"❌ Error al crear usuario: {e}"
 
     return redirect(url_for("rutas_usuarios.listar_usuarios"))
 
 
 # ===============================================================
-# RUTA: ACTUALIZAR USUARIO (con contraseña encriptada)
+# RUTA: ACTUALIZAR USUARIO (por id)
 # ===============================================================
-@rutas_usuarios.route("/usuarios/actualizar/<string:email>", methods=["POST"])
-def actualizar_usuario(email):
+@rutas_usuarios.route("/usuarios/actualizar/<int:id_usuario>", methods=["POST"])
+def actualizar_usuario(id_usuario):
     datos = {
-        "contrasena": request.form.get("contrasena")
+        "contrasena": request.form.get("contrasena"),
+        "ruta_avatar": request.form.get("ruta_avatar"),
+        "activo": request.form.get("activo") == "true"
     }
 
     try:
-        requests.put(f"{API_URL}/email/{email}?camposEncriptar=contrasena", json=datos)
+        r = requests.put(f"{API_URL}/id/{id_usuario}?camposEncriptar=contrasena", json=datos)
+        if r.status_code not in (200, 204):
+            return f"❌ No se pudo actualizar el usuario. Código: {r.status_code} - {r.text}"
     except Exception as e:
-        return f"Error al actualizar usuario: {e}"
+        return f"❌ Error al actualizar usuario: {e}"
 
     return redirect(url_for("rutas_usuarios.listar_usuarios"))
 
 
 # ===============================================================
-# RUTA: ELIMINAR USUARIO
+# RUTA: ELIMINAR USUARIO (por id)
 # ===============================================================
-@rutas_usuarios.route("/usuarios/eliminar/<string:email>", methods=["POST"])
-def eliminar_usuario(email):
+@rutas_usuarios.route("/usuarios/eliminar/<int:id_usuario>", methods=["POST"])
+def eliminar_usuario(id_usuario):
     try:
-        requests.delete(f"{API_URL}/email/{email}")
+        # Estructura real: /api/{tabla}/{nombreClave}/{valorClave}
+        endpoint = f"http://localhost:5031/api/usuario/id/{id_usuario}"
+        r = requests.delete(endpoint)
+
+        if r.status_code not in (200, 204):
+            return f"❌ No se pudo eliminar el usuario. Código: {r.status_code} - {r.text}"
+
     except Exception as e:
-        return f"Error al eliminar usuario: {e}"
+        return f"❌ Error al eliminar usuario: {e}"
 
     return redirect(url_for("rutas_usuarios.listar_usuarios"))
