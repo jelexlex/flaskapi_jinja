@@ -4,13 +4,12 @@
     <h1>Gestión de Variables Estratégicas</h1>
 
     <!-- ===============================
-         Formulario de creación/actualización
-         Usa el modo "crear" o "actualizar" según lo que se envíe desde Flask
+         Formulario de creación / actualización
     ================================== -->
     <form method="post" 
           action="{{ url_for('rutas_variables.crear_variable') if modo == 'crear' else url_for('rutas_variables.actualizar_variable') }}">
         
-        <!-- Campo Código -->
+        <!-- Campo Código (ID en la base de datos) -->
         <input type="number" name="codigo" placeholder="ID"
                value="{{ variable.id if variable else '' }}" required>
 
@@ -22,7 +21,7 @@
         <input type="text" name="descripcion" placeholder="Descripción"
                value="{{ variable.descripcion if variable else '' }}" required>
 
-        <!-- Botón dinámico -->
+        <!-- Botón dinámico (Crear / Actualizar) -->
         <button type="submit">
             {{ "Crear" if modo == "crear" else "Actualizar" }}
         </button>
@@ -36,13 +35,15 @@
         <button type="submit">Buscar</button>
     </form>
 
-    <!-- Mensaje de error o notificación -->
+    <!-- ===============================
+         Mensaje si no encuentra la variable
+    ================================== -->
     {% if mensaje %}
         <p style="color: red;">{{ mensaje }}</p>
     {% endif %}
 
     <!-- ===============================
-         Tabla con todas las variables estratégicas
+         Tabla de variables estratégicas
     ================================== -->
     <table border="1" cellpadding="5" cellspacing="0" style="margin: 20px auto; border-collapse: collapse;">
         <thead>
@@ -61,8 +62,13 @@
                     <td>{{ v.descripcion }}</td>
                     <td style="text-align:center;">
                         <!-- Botón Eliminar -->
-                        <form method="post" action="{{ url_for('rutas_variables.eliminar_variable', codigo=v.id) }}">
+                        <form method="post" action="{{ url_for('rutas_variables.eliminar_variable', codigo=v.id) }}" style="display:inline;">
                             <button type="submit">Eliminar</button>
+                        </form>
+                        <!-- Botón Editar -->
+                        <form method="post" action="{{ url_for('rutas_variables.buscar_variable') }}" style="display:inline;">
+                            <input type="hidden" name="codigo_buscar" value="{{ v.id }}">
+                            <button type="submit">Editar</button>
                         </form>
                     </td>
                 </tr>
