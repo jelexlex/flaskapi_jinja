@@ -94,15 +94,16 @@ def actualizar_variable():
 
 # ------------------- ELIMINAR (con fallback de rutas) -------------------
 @rutas_variables.route("/variables/eliminar/<string:codigo>", methods=["POST"])
-def eliminar_variable(codigo):
+def eliminar_variables(codigo):
+    """
+    Ruta para eliminar una variable de la API según su código.
+    Envía una petición DELETE al endpoint correspondiente.
+    """
     try:
-        # ✅ Esta es la forma correcta para tu API
-        endpoint = f"{API_URL}?id={codigo}"
-        r = requests.delete(endpoint)
-
-        if r.status_code in (200, 204):
-            return redirect(url_for("rutas_variables.variables"))
-        else:
-            return f"No se pudo eliminar la variable. Código: {r.status_code} - {r.text}"
+        requests.delete(f"{API_URL}/codigo/{codigo}")
     except Exception as e:
-        return f"Error al eliminar variable estratégica: {e}"
+        return f"Error al eliminar variable: {e}"
+
+    return redirect(url_for("rutas_variables.variables"))
+
+
