@@ -13,6 +13,7 @@ aplicacion = Flask(__name__)
 # Registrar el Blueprint de productos en la aplicación principal
 aplicacion.register_blueprint(rutas_productos)
 aplicacion.register_blueprint(rutas_variables)
+aplicacion.register_blueprint(rutas_usuarios)
 
 # ------------------- Rutas principales -------------------
 
