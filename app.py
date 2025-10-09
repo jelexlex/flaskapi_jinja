@@ -3,7 +3,8 @@ from flask import Flask, render_template
 
 # Importar el Blueprint que contiene las rutas de productos
 from rutas_productos import rutas_productos
-from rutas_variables import rutas_variables     
+from rutas_variables import rutas_variables   
+from rutas_usuarios  import rutas_usuarios
 # Crear la instancia de la aplicación Flask
 aplicacion = Flask(__name__)
 
