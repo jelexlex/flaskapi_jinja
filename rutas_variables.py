@@ -3,30 +3,25 @@ import requests
 
 rutas_variables = Blueprint("rutas_variables", __name__)
 
-# ✅ Endpoint correcto
+# endpoint real que me dijiste
 API_URL = "http://localhost:5031/api/variable_estrategica"
 
 
-# ------------------- LISTAR variables estratégicas -------------------
+# ------------------- LISTAR -------------------
 @rutas_variables.route("/variables", methods=["GET"])
 def variables():
     try:
-        respuesta = requests.get(API_URL)
-        data = respuesta.json()
-        variables = data.get("datos", [])  # 👈 aquí extraemos la lista real
+        r = requests.get(API_URL)
+        data = r.json()
+        variables = data.get("datos", [])
     except Exception as e:
         print(f"Error al obtener variables: {e}")
         variables = []
 
-    return render_template(
-        "variable_estrategica.html",
-        variables=variables,
-        variable=None,
-        modo="crear"
-    )
+    return render_template("variable_estrategica.html", variables=variables, variable=None, modo="crear")
 
 
-# ------------------- CREAR variable estratégica -------------------
+# ------------------- CREAR -------------------
 @rutas_variables.route("/variables/crear", methods=["POST"])
 def crear_variable():
     datos = {
@@ -36,50 +31,34 @@ def crear_variable():
     }
 
     try:
-        respuesta = requests.post(API_URL, json=datos)
-        if respuesta.status_code in (200, 201):
+        r = requests.post(API_URL, json=datos)
+        if r.status_code in (200, 201):
             return redirect(url_for("rutas_variables.variables"))
         else:
-            return f"Error al crear variable: {respuesta.text}"
+            return f"Error al crear variable: {r.status_code} - {r.text}"
     except Exception as e:
         return f"Error al crear variable estratégica: {e}"
 
 
+# ------------------- BUSCAR (cliente) -------------------
 @rutas_variables.route("/variables/buscar", methods=["POST"])
 def buscar_variable():
     codigo = request.form.get("codigo_buscar")
-
     try:
-        # 📡 Obtener todas las variables desde la API
-        respuesta = requests.get(API_URL)
-        if respuesta.status_code == 200:
-            data = respuesta.json().get("datos", [])
-            # 🔎 Buscar la variable que coincida con el ID ingresado
-            variable = next((v for v in data if str(v["id"]) == str(codigo)), None)
-
-            if variable:
-                return render_template(
-                    "variable_estrategica.html",
-                    variables=data,
-                    variable=variable,
-                    modo="actualizar"
-                )
+        r = requests.get(API_URL)
+        data = r.json().get("datos", [])
+        # buscar localmente porque la API no tiene /codigo/<id>
+        variable = next((v for v in data if str(v.get("id")) == str(codigo)), None)
+        if variable:
+            return render_template("variable_estrategica.html", variables=data, variable=variable, modo="actualizar")
     except Exception as e:
         return f"Error en la búsqueda: {e}"
 
-    # ❌ Si no se encontró
     variables = requests.get(API_URL).json().get("datos", [])
-    return render_template(
-        "variable_estrategica.html",
-        variables=variables,
-        variable=None,
-        mensaje="Variable estratégica no encontrada",
-        modo="crear"
-    )
+    return render_template("variable_estrategica.html", variables=variables, variable=None, mensaje="Variable estratégica no encontrada", modo="crear")
 
 
-
-# ------------------- ACTUALIZAR variable estratégica -------------------
+# ------------------- ACTUALIZAR (con fallback de rutas) -------------------
 @rutas_variables.route("/variables/actualizar", methods=["POST"])
 def actualizar_variable():
     codigo = request.form.get("codigo")
@@ -88,20 +67,42 @@ def actualizar_variable():
         "descripcion": request.form.get("descripcion")
     }
 
-    try:
-        requests.put(f"{API_URL}/codigo/{codigo}", json=datos)
-    except Exception as e:
-        return f"Error al actualizar variable estratégica: {e}"
+    # Intentos de PUT en posibles rutas que la API podría esperar
+    posibles_endpoints = [
+        f"{API_URL}/codigo/{codigo}",  # si API usa "/codigo/<id>"
+        f"{API_URL}/{codigo}",         # si API usa "/<id>"
+    ]
 
-    return redirect(url_for("rutas_variables.variables"))
+    last_resp = None
+    for endpoint in posibles_endpoints:
+        try:
+            r = requests.put(endpoint, json=datos)
+            last_resp = r
+            if r.status_code in (200, 204):
+                return redirect(url_for("rutas_variables.variables"))
+        except Exception as e:
+            print(f"Intento PUT a {endpoint} falló: {e}")
+
+    # Si llegamos aquí, todos los PUT fallaron
+    msg = "No se pudo actualizar la variable. "
+    if last_resp is not None:
+        msg += f"Última respuesta: {last_resp.status_code} - {last_resp.text}"
+    else:
+        msg += "No hubo respuesta del servidor."
+    return msg
 
 
-# ------------------- ELIMINAR variable estratégica -------------------
+# ------------------- ELIMINAR (con fallback de rutas) -------------------
 @rutas_variables.route("/variables/eliminar/<string:codigo>", methods=["POST"])
 def eliminar_variable(codigo):
     try:
-        requests.delete(f"{API_URL}/codigo/{codigo}")
+        # ✅ Esta es la forma correcta para tu API
+        endpoint = f"{API_URL}?id={codigo}"
+        r = requests.delete(endpoint)
+
+        if r.status_code in (200, 204):
+            return redirect(url_for("rutas_variables.variables"))
+        else:
+            return f"No se pudo eliminar la variable. Código: {r.status_code} - {r.text}"
     except Exception as e:
         return f"Error al eliminar variable estratégica: {e}"
-
-    return redirect(url_for("rutas_variables.variables"))
