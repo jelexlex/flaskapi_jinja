@@ -6,7 +6,8 @@
     <form method="post" 
           action="{{ url_for('rutas_variables.crear_variable') if modo == 'crear' else url_for('rutas_variables.actualizar_variable') }}">
         
-        <input type="number" name="codigo" placeholder="ID"
+        <!-- Usamos 'id' en lugar de 'codigo' -->
+        <input type="number" name="id" placeholder="ID"
                value="{{ variable.id if variable else '' }}" required>
 
         <input type="text" name="titulo" placeholder="Título"
@@ -21,7 +22,7 @@
     </form>
 
     <form method="post" action="{{ url_for('rutas_variables.buscar_variable') }}">
-        <input type="number" name="codigo_buscar" placeholder="Buscar por ID" required>
+        <input type="number" name="id_buscar" placeholder="Buscar por ID" required>
         <button type="submit">Buscar</button>
     </form>
 
@@ -45,14 +46,14 @@
                     <td>{{ v.titulo }}</td>
                     <td>{{ v.descripcion }}</td>
                     <td style="text-align:center;">
-                        <!-- Eliminar -->
-                        <form method="post" action="{{ url_for('rutas_variables.eliminar_variable', codigo=v.id) }}">
-                            <button type="submit">Eliminar</button>
+                        <!-- Llamamos al endpoint Flask que hace la DELETE en la API -->
+                        <form method="post" action="{{ url_for('rutas_variables.eliminar_variable', id=v.id) }}" style="display:inline;">
+                            <button type="submit" onclick="return confirm('¿Eliminar esta variable?')">Eliminar</button>
                         </form>
 
-                        <!-- Editar (rellena el formulario principal) -->
+                        <!-- Editar: carga el registro en el formulario -->
                         <form method="post" action="{{ url_for('rutas_variables.buscar_variable') }}" style="display:inline;">
-                            <input type="hidden" name="codigo_buscar" value="{{ v.id }}">
+                            <input type="hidden" name="id_buscar" value="{{ v.id }}">
                             <button type="submit">Editar</button>
                         </form>
                     </td>
