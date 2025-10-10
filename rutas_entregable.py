@@ -20,7 +20,7 @@ def entregable():
         if isinstance(entregables, dict):
             entregables = [entregables]
 
-        # normalizar fechas (quitar la parte "T..." si existe y convertir null a '')
+        # normalizar fechas 
         def clean_fecha(f):
             if not f:
                 return ""
@@ -139,8 +139,8 @@ def actualizar_entregable():
     }
 
     posibles_endpoints = [
-        f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id_actual}",  # /api/entregable/id/5
-        f"{API_BASE}/{TABLA}/{id_actual}",                 # /api/entregable/5
+        f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id_actual}",  
+        f"{API_BASE}/{TABLA}/{id_actual}",                 
         f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id_actual}?esquema=por%20defecto"
     ]
 

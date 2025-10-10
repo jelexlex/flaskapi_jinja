@@ -3,7 +3,7 @@ import requests
 
 rutas_variables = Blueprint("rutas_variables", __name__)
 
-# Base API (la usaremos junto con tabla/nombre_clave)
+
 API_BASE = "http://localhost:5031/api"
 TABLA = "variable_estrategica"
 NOMBRE_CLAVE = "id"
@@ -14,7 +14,7 @@ def variables():
     try:
         r = requests.get(f"{API_BASE}/{TABLA}")
         data = r.json()
-        # tu API devuelve { "datos": [...] }
+        
         variables = data.get("datos", []) if isinstance(data, dict) else data
     except Exception as e:
         print("Error al obtener variables:", e)
@@ -30,7 +30,7 @@ def crear_variable():
             "titulo": request.form.get("titulo"),
             "descripcion": request.form.get("descripcion")
         }
-        # Algunas APIs esperan el id en el body para INSERT; si no, la API lo genera.
+        
         r = requests.post(f"{API_BASE}/{TABLA}", json=payload, timeout=10)
         if r.status_code not in (200, 201):
             return f"Error al crear: {r.status_code} - {r.text}"
@@ -48,7 +48,7 @@ def buscar_variable():
         r = requests.get(f"{API_BASE}/{TABLA}", timeout=10)
         data = r.json()
         datos = data.get("datos", []) if isinstance(data, dict) else data
-        # buscar por id (comparando como str por seguridad)
+        
         variable = next((v for v in datos if str(v.get("id")) == str(id_buscar)), None)
         if variable:
             return render_template("variable_estrategica.html", variables=datos, variable=variable, modo="actualizar")
@@ -73,9 +73,9 @@ def actualizar_variable():
     }
 
     posibles_endpoints = [
-        f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id_actual}",  # /api/variable_estrategica/id/5
-        f"{API_BASE}/{TABLA}/{id_actual}",                 # /api/variable_estrategica/5
-        f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id_actual}?esquema=por%20defecto"  # con esquema
+        f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id_actual}",  
+        f"{API_BASE}/{TABLA}/{id_actual}",                 
+        f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id_actual}?esquema=por%20defecto"  
     ]
 
     last_resp = None
@@ -98,10 +98,10 @@ def actualizar_variable():
 @rutas_variables.route("/variables/eliminar/<int:id>", methods=["POST"])
 def eliminar_variable(id):
     posibles_endpoints = [
-        f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id}",        # /api/variable_estrategica/id/5
-        f"{API_BASE}/{TABLA}/{id}",                       # /api/variable_estrategica/5
-        f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id}?esquema=por%20defecto",  # con esquema
-        f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id}"         # repetido por seguridad (idem primera)
+        f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id}",        
+        f"{API_BASE}/{TABLA}/{id}",                       
+        f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id}?esquema=por%20defecto",  
+        f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id}"         
     ]
 
     last_resp = None
@@ -117,6 +117,6 @@ def eliminar_variable(id):
             detalles.append((endpoint, "EXC", str(e)))
             print(f"DELETE a {endpoint} falló: {e}")
 
-    # Construir mensaje de depuración claro para que puedas copiar/pegar
+    
     detalle_str = "\n".join([f"{ep} -> {st} - {tx}" for ep, st, tx in detalles])
     return f"No se pudo eliminar la variable. Intentos:\n{detalle_str}"

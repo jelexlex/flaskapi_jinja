@@ -3,10 +3,10 @@ import requests
 
 rutas_tipo_responsable = Blueprint("rutas_tipo_responsable", __name__)
 
-# 📌 Configuración base
+
 API_BASE = "http://localhost:5031/api"
-TABLA = "tipo_responsable"     # 👈 Nombre de la tabla en tu API
-NOMBRE_CLAVE = "id"            # 👈 Nombre de la columna clave
+TABLA = "tipo_responsable"     
+NOMBRE_CLAVE = "id"            
 
 # ------------------- LISTAR tipos de responsable -------------------
 @rutas_tipo_responsable.route("/tipo_responsable", methods=["GET"])

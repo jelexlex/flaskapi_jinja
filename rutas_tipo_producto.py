@@ -1,10 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 import requests
 
-# 📌 Nombre del blueprint
+
 rutas_tipo_producto = Blueprint("rutas_tipo_producto", __name__)
 
-# 📌 Configuración de la API
+
 API_BASE = "http://localhost:5031/api"
 TABLA = "tipo_producto"
 NOMBRE_CLAVE = "id"

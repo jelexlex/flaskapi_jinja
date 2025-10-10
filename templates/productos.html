@@ -3,11 +3,7 @@
 {% block contenido %}
     <h1>Gestión de Productos</h1>
 
-    <!-- ===============================
-         Formulario de creación/actualización
-         - Usa el modo "crear" o "actualizar" según lo que se envíe desde Flask
-         - Si "producto" tiene datos, los carga en el formulario
-    ================================== -->
+        <!-- formulario actualizacion -->
     <form method="post" 
           action="{{ url_for('rutas_productos.crear_producto') if modo == 'crear' else url_for('rutas_productos.actualizar_producto') }}">
         
@@ -35,8 +31,7 @@
 
     <!-- ===============================
          Formulario de búsqueda
-         - Permite buscar un producto por su código
-         - Si lo encuentra, carga sus datos en el formulario principal
+        
     ================================== -->
     <form method="post" action="{{ url_for('rutas_productos.buscar_producto') }}">
         <input type="text" name="codigo_buscar" placeholder="Buscar por código" required>
@@ -50,8 +45,7 @@
 
     <!-- ===============================
          Tabla con todos los productos
-         - Los productos vienen desde la API en la clave "datos"
-         - Cada fila muestra un producto con su botón de eliminar
+        
     ================================== -->
     <table border="1" cellpadding="5" cellspacing="0" style="margin: 20px auto;">
         <thead>

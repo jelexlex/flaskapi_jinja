@@ -6,7 +6,7 @@
     <form method="post" 
           action="{{ url_for('rutas_variables.crear_variable') if modo == 'crear' else url_for('rutas_variables.actualizar_variable') }}">
         
-        <!-- Usamos 'id' en lugar de 'codigo' -->
+        <!-- Uso 'id' -->
         <input type="number" name="id" placeholder="ID"
                value="{{ variable.id if variable else '' }}" required>
 
@@ -46,7 +46,7 @@
                     <td>{{ v.titulo }}</td>
                     <td>{{ v.descripcion }}</td>
                     <td style="text-align:center;">
-                        <!-- Llamamos al endpoint Flask que hace la DELETE en la API -->
+                        <!-- Delete -->
                         <form method="post" action="{{ url_for('rutas_variables.eliminar_variable', id=v.id) }}" style="display:inline;">
                             <button type="submit" onclick="return confirm('¿Eliminar esta variable?')">Eliminar</button>
                         </form>
