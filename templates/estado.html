@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block titulo_pagina %}Gestión de Estados{% endblock %}
+{% block encabezado %}Gestión de Estados{% endblock %}
+
+{% block contenido %}
+    <h1 style="text-align:center; margin-top: 10px;">Gestión de Estados</h1>
+
+    <!-- FORMULARIO CREAR / ACTUALIZAR -->
+    <form method="post"
+          action="{{ url_for('rutas_estado.crear_estado') if modo == 'crear' else url_for('rutas_estado.actualizar_estado') }}"
+          style="max-width: 800px; margin: 0 auto 10px; display:flex; gap:8px; flex-wrap:wrap;">
+        
+        {% if modo == 'actualizar' %}
+            <input type="hidden" name="id" value="{{ estado.id }}">
+        {% endif %}
+
+        <input type="text" name="nombre" placeholder="Nombre" value="{{ estado.nombre if estado else '' }}" required style="flex: 1 0 250px;">
+        <input type="text" name="descripcion" placeholder="Descripción" value="{{ estado.descripcion if estado else '' }}" style="flex: 1 0 250px;">
+
+        <button type="submit" style="padding: 6px 12px;">
+            {{ "Agregar" if modo == "crear" else "Actualizar" }}
+        </button>
+    </form>
+
+    <!-- FORMULARIO BUSCAR -->
+    <form method="post" action="{{ url_for('rutas_estado.buscar_estado') }}" style="max-width:400px;margin: 0 auto 12px; display:flex; gap:8px;">
+        <input type="number" name="id_buscar" placeholder="Buscar por ID" required style="flex:1;">
+        <button type="submit">Buscar</button>
+    </form>
+
+    {% if mensaje %}
+        <p style="color: red; text-align:center;">{{ mensaje }}</p>
+    {% endif %}
+
+    <!-- TABLA -->
+    <div style="max-width: 700px; margin: 20px auto;">
+        <table border="1" cellpadding="6" cellspacing="0" style="width:100%; border-collapse:collapse;">
+            <thead style="background:#f2f2f2;">
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for e in estados %}
+                    <tr>
+                        <td>{{ e.id }}</td>
+                        <td>{{ e.nombre }}</td>
+                        <td>{{ e.descripcion }}</td>
+                        <td style="text-align:center;">
+                            <form method="post" action="{{ url_for('rutas_estado.buscar_estado') }}" style="display:inline;">
+                                <input type="hidden" name="id_buscar" value="{{ e.id }}">
+                                <button type="submit">Editar</button>
+                            </form>
+
+                            <form method="post" action="{{ url_for('rutas_estado.eliminar_estado', id=e.id) }}" style="display:inline;">
+                                <button type="submit" onclick="return confirm('¿Eliminar estado {{ e.id }}?')">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align:center; color:#666;">No hay estados registrados.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
