@@ -7,7 +7,7 @@ from rutas_variables import rutas_variables
 from rutas_usuarios  import rutas_usuarios
 from rutas_tipo_responsable import rutas_tipo_responsable
 from rutas_tipo_producto import rutas_tipo_producto
-
+from rutas_tipo_proyecto import rutas_tipo_proyecto
 # Crear la instancia de la aplicación Flask
 aplicacion = Flask(__name__)
 
@@ -18,6 +18,7 @@ aplicacion.register_blueprint(rutas_variables)
 aplicacion.register_blueprint(rutas_usuarios)
 aplicacion.register_blueprint(rutas_tipo_responsable)
 aplicacion.register_blueprint(rutas_tipo_producto)
+aplicacion.register_blueprint(rutas_tipo_proyecto)
 
 # ------------------- Rutas principales -------------------
 

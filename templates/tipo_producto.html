@@ -8,7 +8,7 @@
           action="{{ url_for('rutas_tipo_producto.crear_tipo_producto') if modo == 'crear' else url_for('rutas_tipo_producto.actualizar_tipo_producto') }}">
         
         <input type="number" name="id" placeholder="ID"
-               value="{{ tipo.id if tipo else '' }}" required>
+               value="{{ tipo.id if tipo else '' }}" {{ 'readonly' if modo != 'crear' }} required>
 
         <input type="text" name="nombre" placeholder="Nombre"
                value="{{ tipo.nombre if tipo else '' }}" required>
@@ -28,39 +28,51 @@
     </form>
 
     {% if mensaje %}
-        <p style="color: red;">{{ mensaje }}</p>
+        <p style="color: red; text-align:center;">{{ mensaje }}</p>
     {% endif %}
 
-    <!-- TABLA -->
-    <table border="1" cellpadding="5" cellspacing="0" style="margin: 20px auto; border-collapse: collapse;">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for t in tipos %}
-                <tr>
-                    <td>{{ t.id }}</td>
-                    <td>{{ t.nombre }}</td>
-                    <td>{{ t.descripcion }}</td>
-                    <td style="text-align:center;">
-                        <!-- ELIMINAR -->
-                        <form method="post" action="{{ url_for('rutas_tipo_producto.eliminar_tipo_producto', id=t.id) }}" style="display:inline;">
-                            <button type="submit" onclick="return confirm('¿Eliminar este tipo de producto?')">Eliminar</button>
-                        </form>
+    <!-- TABLA ENCLOSADA Y CENTRADA -->
+    <div class="card shadow-sm mt-4" style="max-width: 80%; margin: 0 auto;">
+        <div class="card-header bg-dark text-white text-center">
+            Lista de Tipos de Producto
+        </div>
 
-                        <!-- EDITAR -->
-                        <form method="post" action="{{ url_for('rutas_tipo_producto.buscar_tipo_producto') }}" style="display:inline;">
-                            <input type="hidden" name="id_buscar" value="{{ t.id }}">
-                            <button type="submit">Editar</button>
-                        </form>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+        <div class="table-responsive">
+            <table border="1" cellpadding="5" cellspacing="0" style="margin: 20px auto; border-collapse: collapse;">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tipos %}
+                        <tr>
+                            <td>{{ t.id }}</td>
+                            <td>{{ t.nombre }}</td>
+                            <td>{{ t.descripcion }}</td>
+                            <td style="text-align:center;">
+                                <!-- ELIMINAR -->
+                                <form method="post" action="{{ url_for('rutas_tipo_producto.eliminar_tipo_producto', id=t.id) }}" style="display:inline;">
+                                    <button type="submit" onclick="return confirm('¿Eliminar este tipo de producto?')">Eliminar</button>
+                                </form>
+
+                                <!-- EDITAR -->
+                                <form method="post" action="{{ url_for('rutas_tipo_producto.buscar_tipo_producto') }}" style="display:inline;">
+                                    <input type="hidden" name="id_buscar" value="{{ t.id }}">
+                                    <button type="submit">Editar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">No hay tipos de producto registrados.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 {% endblock %}
