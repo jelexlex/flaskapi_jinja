@@ -1,18 +1,17 @@
 {% extends "base.html" %}
 
 {% block contenido %}
-    <h1>Gestión de Tipos de Responsable</h1>
+    <h1>Gestión de Tipos de Producto</h1>
 
     <!-- FORMULARIO CREAR / ACTUALIZAR -->
     <form method="post" 
-          action="{{ url_for('rutas_tipo_responsable.crear_tipo_responsable') if modo == 'crear' else url_for('rutas_tipo_responsable.actualizar_tipo_responsable') }}">
+          action="{{ url_for('rutas_tipo_producto.crear_tipo_producto') if modo == 'crear' else url_for('rutas_tipo_producto.actualizar_tipo_producto') }}">
         
-        <!-- ID -->
         <input type="number" name="id" placeholder="ID"
                value="{{ tipo.id if tipo else '' }}" required>
 
-        <input type="text" name="titulo" placeholder="Título"
-               value="{{ tipo.titulo if tipo else '' }}" required>
+        <input type="text" name="nombre" placeholder="Nombre"
+               value="{{ tipo.nombre if tipo else '' }}" required>
 
         <input type="text" name="descripcion" placeholder="Descripción"
                value="{{ tipo.descripcion if tipo else '' }}" required>
@@ -23,7 +22,7 @@
     </form>
 
     <!-- FORMULARIO BUSCAR -->
-    <form method="post" action="{{ url_for('rutas_tipo_responsable.buscar_tipo_responsable') }}">
+    <form method="post" action="{{ url_for('rutas_tipo_producto.buscar_tipo_producto') }}">
         <input type="number" name="id_buscar" placeholder="Buscar por ID" required>
         <button type="submit">Buscar</button>
     </form>
@@ -32,12 +31,12 @@
         <p style="color: red;">{{ mensaje }}</p>
     {% endif %}
 
-    <!-- TABLA LISTADO -->
+    <!-- TABLA -->
     <table border="1" cellpadding="5" cellspacing="0" style="margin: 20px auto; border-collapse: collapse;">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Título</th>
+                <th>Nombre</th>
                 <th>Descripción</th>
                 <th>Acciones</th>
             </tr>
@@ -46,16 +45,16 @@
             {% for t in tipos %}
                 <tr>
                     <td>{{ t.id }}</td>
-                    <td>{{ t.titulo }}</td>
+                    <td>{{ t.nombre }}</td>
                     <td>{{ t.descripcion }}</td>
                     <td style="text-align:center;">
                         <!-- ELIMINAR -->
-                        <form method="post" action="{{ url_for('rutas_tipo_responsable.eliminar_tipo_responsable', id=t.id) }}" style="display:inline;">
-                            <button type="submit" onclick="return confirm('¿Eliminar este tipo de responsable?')">Eliminar</button>
+                        <form method="post" action="{{ url_for('rutas_tipo_producto.eliminar_tipo_producto', id=t.id) }}" style="display:inline;">
+                            <button type="submit" onclick="return confirm('¿Eliminar este tipo de producto?')">Eliminar</button>
                         </form>
 
                         <!-- EDITAR -->
-                        <form method="post" action="{{ url_for('rutas_tipo_responsable.buscar_tipo_responsable') }}" style="display:inline;">
+                        <form method="post" action="{{ url_for('rutas_tipo_producto.buscar_tipo_producto') }}" style="display:inline;">
                             <input type="hidden" name="id_buscar" value="{{ t.id }}">
                             <button type="submit">Editar</button>
                         </form>

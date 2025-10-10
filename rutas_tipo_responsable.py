@@ -1,90 +1,116 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 import requests
 
-# 📌 URL base de la API
-API_URL = "http://localhost:5031/api/tipo_responsable"
-
-# 📌 Nombre del blueprint
 rutas_tipo_responsable = Blueprint("rutas_tipo_responsable", __name__)
 
-# ------------------- LISTAR -------------------
-@rutas_tipo_responsable.route("/tipo_responsable")
+# 📌 Configuración base
+API_BASE = "http://localhost:5031/api"
+TABLA = "tipo_responsable"     # 👈 Nombre de la tabla en tu API
+NOMBRE_CLAVE = "id"            # 👈 Nombre de la columna clave
+
+# ------------------- LISTAR tipos de responsable -------------------
+@rutas_tipo_responsable.route("/tipo_responsable", methods=["GET"])
 def tipo_responsable():
     try:
-        r = requests.get(API_URL)
-        tipos = r.json() if r.status_code == 200 else []
+        r = requests.get(f"{API_BASE}/{TABLA}", timeout=10)
+        data = r.json()
+        tipos = data.get("datos", []) if isinstance(data, dict) else data
     except Exception as e:
+        print("Error al obtener tipos de responsable:", e)
         tipos = []
-        print(f"⚠️ Error al obtener los tipos de responsable: {e}")
-
-    # 👇 tipo=None asegura que en la vista no se intente acceder a .id de un string
-    return render_template("tipo_responsable.html", tipos=tipos, tipo=None, modo="crear", mensaje=None)
+    return render_template("tipo_responsable.html", tipos=tipos, tipo=None, modo="crear")
 
 
-# ------------------- CREAR -------------------
+# ------------------- CREAR tipo de responsable -------------------
 @rutas_tipo_responsable.route("/tipo_responsable/crear", methods=["POST"])
 def crear_tipo_responsable():
-    data = {
-        "id": int(request.form["id"]),
-        "titulo": request.form["titulo"],
-        "descripcion": request.form["descripcion"]
-    }
-    r = requests.post(API_URL, json=data)
+    try:
+        payload = {
+            "titulo": request.form.get("titulo"),
+            "descripcion": request.form.get("descripcion")
+        }
+        r = requests.post(f"{API_BASE}/{TABLA}", json=payload, timeout=10)
+        if r.status_code not in (200, 201):
+            return f"Error al crear: {r.status_code} - {r.text}"
+    except Exception as e:
+        return f"Error al crear tipo de responsable: {e}"
 
-    if r.status_code in (200, 201):
-        return redirect(url_for("rutas_tipo_responsable.tipo_responsable"))
-    else:
-        return render_template("tipo_responsable.html", tipos=[], tipo=None, modo="crear", mensaje=f"No se pudo crear. Código: {r.status_code}")
+    return redirect(url_for("rutas_tipo_responsable.tipo_responsable"))
 
 
-# ------------------- BUSCAR -------------------
+# ------------------- BUSCAR tipo de responsable -------------------
 @rutas_tipo_responsable.route("/tipo_responsable/buscar", methods=["POST"])
 def buscar_tipo_responsable():
-    id_buscar = request.form["id_buscar"]
+    id_buscar = request.form.get("id_buscar") or request.form.get("id")
     try:
-        r = requests.get(f"{API_URL}/{id_buscar}")
-        if r.status_code == 200:
-            tipo = r.json()
-
-            # 👇 Si la API devuelve un string, lo convertimos en dict vacío para evitar el error
-            if isinstance(tipo, str):
-                tipo = None
-
-            r_lista = requests.get(API_URL)
-            tipos = r_lista.json() if r_lista.status_code == 200 else []
-            return render_template("tipo_responsable.html", tipos=tipos, tipo=tipo, modo="editar", mensaje=None)
-        else:
-            return render_template("tipo_responsable.html", tipos=[], tipo=None, modo="crear", mensaje="No se encontró el tipo de responsable.")
+        r = requests.get(f"{API_BASE}/{TABLA}", timeout=10)
+        data = r.json()
+        datos = data.get("datos", []) if isinstance(data, dict) else data
+        tipo = next((t for t in datos if str(t.get("id")) == str(id_buscar)), None)
+        if tipo:
+            return render_template("tipo_responsable.html", tipos=datos, tipo=tipo, modo="actualizar")
     except Exception as e:
-        return f"⚠️ Error al buscar tipo de responsable: {e}"
+        return f"Error en la búsqueda: {e}"
+
+    return render_template("tipo_responsable.html",
+                           tipos=requests.get(f"{API_BASE}/{TABLA}").json().get("datos", []),
+                           tipo=None,
+                           mensaje="Tipo de responsable no encontrado",
+                           modo="crear")
 
 
-# ------------------- ACTUALIZAR -------------------
+# ------------------- ACTUALIZAR tipo de responsable -------------------
 @rutas_tipo_responsable.route("/tipo_responsable/actualizar", methods=["POST"])
 def actualizar_tipo_responsable():
-    id_tipo = int(request.form["id"])
-    data = {
-        "titulo": request.form["titulo"],
-        "descripcion": request.form["descripcion"]
+    id_actual = request.form.get("id")
+    datos = {
+        "titulo": request.form.get("titulo"),
+        "descripcion": request.form.get("descripcion")
     }
-    r = requests.put(f"{API_URL}/{id_tipo}", json=data)
 
-    if r.status_code in (200, 204):
-        return redirect(url_for("rutas_tipo_responsable.tipo_responsable"))
-    else:
-        return f"No se pudo actualizar. Código: {r.status_code}"
+    posibles_endpoints = [
+        f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id_actual}",
+        f"{API_BASE}/{TABLA}/{id_actual}",
+        f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id_actual}?esquema=por%20defecto"
+    ]
+
+    last_resp = None
+    for endpoint in posibles_endpoints:
+        try:
+            r = requests.put(endpoint, json=datos, timeout=10)
+            last_resp = r
+            if r.status_code in (200, 204):
+                return redirect(url_for("rutas_tipo_responsable.tipo_responsable"))
+        except Exception as e:
+            print(f"PUT a {endpoint} falló: {e}")
+
+    if last_resp is not None:
+        return f"No se pudo actualizar. Última respuesta: {last_resp.status_code} - {last_resp.text}"
+    return "No se pudo actualizar el tipo de responsable."
 
 
-# ------------------- ELIMINAR -------------------
+# ------------------- ELIMINAR tipo de responsable -------------------
 @rutas_tipo_responsable.route("/tipo_responsable/eliminar/<int:id>", methods=["POST"])
 def eliminar_tipo_responsable(id):
-    try:
-        # 👇 Cambia esto si tu API no usa /id/
-        r = requests.delete(f"{API_URL}/id/{id}")  
+    posibles_endpoints = [
+        f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id}",
+        f"{API_BASE}/{TABLA}/{id}",
+        f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id}?esquema=por%20defecto",
+        f"{API_BASE}/{TABLA}/{NOMBRE_CLAVE}/{id}"
+    ]
 
-        if r.status_code in (200, 204):
-            return redirect(url_for("rutas_tipo_responsable.tipo_responsable"))
-        else:
-            return f"No se pudo eliminar el tipo de responsable. Código: {r.status_code} - {r.text}"
-    except Exception as e:
-        return f"⚠️ Error al eliminar tipo de responsable: {e}"
+    last_resp = None
+    detalles = []
+    for endpoint in posibles_endpoints:
+        try:
+            r = requests.delete(endpoint, timeout=10)
+            detalles.append((endpoint, r.status_code, r.text))
+            last_resp = r
+            if r.status_code in (200, 204):
+                return redirect(url_for("rutas_tipo_responsable.tipo_responsable"))
+        except Exception as e:
+            detalles.append((endpoint, "EXC", str(e)))
+            print(f"DELETE a {endpoint} falló: {e}")
+
+    detalle_str = "\n".join([f"{ep} -> {st} - {tx}" for ep, st, tx in detalles])
+    return f"No se pudo eliminar el tipo de responsable. Intentos:\n{detalle_str}"
