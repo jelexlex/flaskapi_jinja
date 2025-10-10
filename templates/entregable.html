@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">📦 Gestión de Entregables</h2>
+
+    <!-- 📝 Formulario -->
+    <form action="{{ url_for('rutas_entregable.crear_entregable') if modo == 'crear' else url_for('rutas_entregable.actualizar_entregable') }}" method="POST" class="row g-2 mb-4">
+        {% if modo == 'actualizar' %}
+            <input type="hidden" name="id" value="{{ entregable.id }}">
+        {% endif %}
+
+        <div class="col-md-2"><input type="text" name="codigo" value="{{ entregable.codigo if entregable }}" class="form-control" placeholder="Código" required></div>
+        <div class="col-md-2"><input type="text" name="titulo" value="{{ entregable.titulo if entregable }}" class="form-control" placeholder="Título" required></div>
+        <div class="col-md-3"><input type="text" name="descripcion" value="{{ entregable.descripcion if entregable }}" class="form-control" placeholder="Descripción"></div>
+        <div class="col-md-2"><input type="date" name="fecha_inicio" value="{{ entregable.fecha_inicio if entregable }}" class="form-control"></div>
+        <div class="col-md-2"><input type="date" name="fecha_fin_prevista" value="{{ entregable.fecha_fin_prevista if entregable }}" class="form-control"></div>
+        <div class="col-md-2"><input type="date" name="fecha_modificacion" value="{{ entregable.fecha_modificacion if entregable }}" class="form-control"></div>
+        <div class="col-md-2"><input type="date" name="fecha_finalizacion" value="{{ entregable.fecha_finalizacion if entregable }}" class="form-control"></div>
+
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-{{ 'primary' if modo == 'crear' else 'warning' }} w-100">
+                {{ 'Agregar' if modo == 'crear' else 'Actualizar' }}
+            </button>
+        </div>
+    </form>
+
+    <!-- 🔍 Buscar -->
+    <form action="{{ url_for('rutas_entregable.buscar_entregable') }}" method="POST" class="mb-3 d-flex">
+        <input type="number" name="id_buscar" class="form-control me-2" placeholder="Buscar por ID" required>
+        <button type="submit" class="btn btn-info">Buscar</button>
+    </form>
+
+    <!-- 📋 Tabla -->
+    <table class="table table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Código</th>
+                <th>Título</th>
+                <th>Descripción</th>
+                <th>Inicio</th>
+                <th>Fin Previsto</th>
+                <th>Modificación</th>
+                <th>Finalización</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for e in entregables %}
+            <tr>
+                <td>{{ e.id }}</td>
+                <td>{{ e.codigo }}</td>
+                <td>{{ e.titulo }}</td>
+                <td>{{ e.descripcion }}</td>
+                <td>{{ e.fecha_inicio }}</td>
+                <td>{{ e.fecha_fin_prevista }}</td>
+                <td>{{ e.fecha_modificacion }}</td>
+                <td>{{ e.fecha_finalizacion }}</td>
+                <td class="d-flex gap-1">
+                    <!-- ✏️ Editar -->
+                    <form action="{{ url_for('rutas_entregable.buscar_entregable') }}" method="POST" class="d-inline">
+                        <input type="hidden" name="id_buscar" value="{{ e.id }}">
+                        <button type="submit" class="btn btn-sm btn-warning">✏️</button>
+                    </form>
+
+                    <!-- 🗑️ Eliminar -->
+                    <form action="{{ url_for('rutas_entregable.eliminar_entregable', id=e.id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Eliminar este entregable?')">
+                        <button type="submit" class="btn btn-sm btn-danger">🗑️</button>
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
